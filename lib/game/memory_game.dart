@@ -13,36 +13,32 @@ import 'components/card_component.dart';
 class MemoryGame extends FlameGame {
   final LevelModel level;
   final GameController controller = Get.find<GameController>();
+  final Color topColor; // Colore ricevuto dalla UI
 
   CardComponent? firstCardFlipped;
   bool isProcessing = false;
 
-  MemoryGame(this.level);
-
-  @override
-  Color backgroundColor() => const Color(0xFF2C3E50);
+  // Costruttore aggiornato per ricevere il colore
+  MemoryGame(this.level, {required this.topColor});
 
   @override
   Future<void> onLoad() async {
-    // 1. Setup Camera (Top-Left Origin)
+    // Passiamo il colore al componente di sfondo
+    world.add(AnimatedBackgroundComponent(topColor: topColor, priority: -100));
+
     camera = CameraComponent();
     camera.viewfinder.anchor = Anchor.topLeft;
-    camera.viewfinder.position = Vector2.zero(); // Force 0,0
+    camera.viewfinder.position = Vector2.zero();
 
-    // 2. Spawn Cards
     await _spawnCards();
-    
-    // 3. Initial Layout Update
     _updateCardsLayout(size);
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    // Ensure camera stays anchored correctly
     camera.viewfinder.anchor = Anchor.topLeft;
     camera.viewfinder.position = Vector2.zero();
-    
     _updateCardsLayout(size);
   }
 
@@ -50,54 +46,36 @@ class MemoryGame extends FlameGame {
     int pairs = level.cardCount ~/ 2;
     List<CardComponent> deck = [];
 
-    // 1. Creiamo le carte
     for (int i = 0; i < pairs; i++) {
       int rank = (i % 13) + 1; 
       int suit = i % 4;
-      // Posizione provvisoria zero, la settiamo tra poco
       deck.add(CardComponent(id: i * 2, rank: rank, suit: suit, position: Vector2.zero()));
       deck.add(CardComponent(id: i * 2 + 1, rank: rank, suit: suit, position: Vector2.zero()));
     }
 
-    // 2. Calcoliamo l'area di spawn sicura
     Random rnd = Random();
-    
-    // Dimensioni schermo attuali
-    double w = size.x;
-    double h = size.y;
+    double w = size.x > 0 ? size.x : 800;
+    double h = size.y > 0 ? size.y : 600;
 
-    // Se per qualche motivo size è 0 (caricamento veloce), usiamo valori di fallback
-    if (w <= 0) w = 800;
-    if (h <= 0) h = 600;
-
-    // Margini
-    double margin = 50.0; // Bordo laterale
-    double topSafeZone = 180.0; // Spazio abbondante in alto per Score e Titolo
+    double margin = 50.0;
+    double topSafeZone = 180.0; 
     
-    // Spazio effettivo dove possono nascere le carte
     double spawnWidth = w - (margin * 2);
     double spawnHeight = h - topSafeZone - margin;
 
-    // 3. Assegniamo posizioni casuali
     for (var card in deck) {
-      // Generiamo coordinate random dentro l'area sicura
       double randomX = margin + (rnd.nextDouble() * spawnWidth);
       double randomY = topSafeZone + (rnd.nextDouble() * spawnHeight);
-      
       card.position = Vector2(randomX, randomY);
       world.add(card);
     }
   }
 
   void _updateCardsLayout(Vector2 screenSize) {
-    // Determine scale factor based on screen width
-    // Target width: approx 20-25% of screen width per card
     double targetW = screenSize.x * 0.25; 
     double baseW = 75.0; 
-    
     double scaleFactor = (targetW / baseW).clamp(0.8, 2.5); 
 
-    // Update all cards in the world
     for (var card in world.children.query<CardComponent>()) {
       card.updateBounds(screenSize, scaleFactor);
     }
@@ -128,5 +106,45 @@ class MemoryGame extends FlameGame {
       firstCardFlipped = null;
       isProcessing = false;
     }
+  }
+}
+
+// --- SFONDO AGGIORNATO ---
+class AnimatedBackgroundComponent extends PositionComponent with HasGameRef {
+  final Color topColor;
+  
+  AnimatedBackgroundComponent({required this.topColor, super.priority});
+
+  double _time = 0;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _time += dt * 0.3; // Animazione lenta
+    size = gameRef.size;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    // Colore 1 (ALTO): Fisso, uguale alla AppBar
+    final colorTop = topColor;
+    
+    // Colore 2 (BASSO): Scuro e animato (DeepPurple scuro <-> Nero)
+    // Usiamo il seno per oscillare leggermente la tonalità scura
+    final colorBottom = Color.lerp(
+      Colors.deepPurple.shade900, 
+      Colors.black, 
+      (sin(_time) + 1) / 2
+    )!;
+
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,    // Inizia esattamente in alto
+        end: Alignment.bottomCenter,   // Finisce in basso
+        stops: const [0.0, 1.0],       // Sfumatura lineare completa
+        colors: [colorTop, colorBottom],
+      ).createShader(Rect.fromLTWH(0, 0, size.x, size.y));
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y), paint);
   }
 }

@@ -1,4 +1,5 @@
-import 'dart:async'; // <--- NECESSARIO PER IL TIMER
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/level_model.dart';
 import '../services/storage_service.dart';
@@ -15,7 +16,7 @@ class GameController extends GetxController {
   var unlockedLevels = <int>[].obs;
 
   LevelModel? currentLevel;
-  Timer? _gameTimer; // <--- Riferimento al timer per poterlo stoppare
+  Timer? _gameTimer;
 
   @override
   void onInit() {
@@ -23,11 +24,18 @@ class GameController extends GetxController {
     refreshUnlockedLevels();
   }
   
-  // Importante: Se il controller viene distrutto, fermiamo il timer
   @override
   void onClose() {
     _stopTimer();
     super.onClose();
+  }
+
+  // Chiamato quando si esce dalla schermata di gioco con "Indietro"
+  void stopGamePrematurely() {
+    print("Gioco interrotto dall'utente.");
+    _stopTimer();
+    isGameOver.value = false;
+    isLevelCompleted.value = false;
   }
 
   void refreshUnlockedLevels() {
@@ -46,18 +54,12 @@ class GameController extends GetxController {
     isLevelCompleted.value = false;
     timeRemaining.value = level.timeLimit;
     
-    // AVVIAMO IL TIMER
     _startTimer();
-    
     print("Game Started: Level ${level.id}");
   }
 
-  // --- LOGICA TIMER ---
   void _startTimer() {
-    // Cancelliamo eventuali timer precedenti per sicurezza
     _stopTimer();
-    
-    // Timer che scatta ogni secondo
     _gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (isLevelCompleted.value || isGameOver.value) {
         timer.cancel();
@@ -65,9 +67,8 @@ class GameController extends GetxController {
       }
 
       if (timeRemaining.value > 0) {
-        timeRemaining.value--; // Decrementa di 1 secondo
+        timeRemaining.value--; 
       } else {
-        // TEMPO SCADUTO!
         _handleGameOver();
       }
     });
@@ -83,19 +84,50 @@ class GameController extends GetxController {
     _stopTimer();
     isGameOver.value = true;
     
-    Get.snackbar(
-      "Game Over", 
-      "Time is up! Try again.",
-      backgroundColor: Get.theme.colorScheme.error,
-      colorText: Get.theme.colorScheme.onError,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
+    Get.defaultDialog(
+      title: "GAME OVER",
+      titleStyle: const TextStyle(
+        color: Colors.redAccent, 
+        fontSize: 24, 
+        fontWeight: FontWeight.bold
+      ),
+      middleText: "Time is up! Don't give up.",
+      backgroundColor: Colors.white,
+      barrierDismissible: false,
+      radius: 15,
+      contentPadding: const EdgeInsets.all(20),
+      
+      confirm: SizedBox(
+        width: 140,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Get.back(); 
+            if (currentLevel != null) {
+              startGame(currentLevel!); 
+              Get.offNamed('/game');    
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green, 
+            foregroundColor: Colors.white
+          ),
+          icon: const Icon(Icons.refresh),
+          label: const Text("Try Again"),
+        ),
+      ),
+      
+      cancel: SizedBox(
+        width: 140,
+        child: OutlinedButton.icon(
+          onPressed: () {
+            Get.back(); 
+            Get.offNamed('/levels'); 
+          },
+          icon: const Icon(Icons.grid_view),
+          label: const Text("Levels"),
+        ),
+      ),
     );
-    
-    // Dopo un po' torniamo ai livelli
-    Future.delayed(const Duration(seconds: 3), () {
-      Get.offNamed('/levels');
-    });
   }
 
   void onPairMatched() {
@@ -109,33 +141,23 @@ class GameController extends GetxController {
 
   void _completeLevel() {
     if (isGameOver.value) return; 
-    
-    // FERMIAMO IL TIMER SUBITO!
     _stopTimer();
-
     isLevelCompleted.value = true;
     
     if (currentLevel != null) {
-      // Calcolo Tempo Impiegato
-      // Ora timeRemaining sarà diverso da timeLimit!
       double timeTaken = currentLevel!.timeLimit - timeRemaining.value;
-      
       _storage.saveLevelResult(currentLevel!.id, timeTaken);
 
       int nextLevelId = currentLevel!.id + 1;
-      
-      // Controllo se è l'ultimo livello
       bool isLastLevel = nextLevelId > gameLevels.length;
 
       if (!isLastLevel) {
         _storage.unlockLevel(nextLevelId);
         refreshUnlockedLevels();
-        
         Future.delayed(const Duration(milliseconds: 500), () {
           Get.offNamed('/result'); 
         });
       } else {
-        print("GIOCO FINITO!");
         Future.delayed(const Duration(milliseconds: 500), () {
           Get.offNamed('/summary'); 
         });
