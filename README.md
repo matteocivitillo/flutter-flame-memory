@@ -1,8 +1,8 @@
-# Ember Match - Floating Memory Game
+# Memory Match - Floating Memory Game
 
 ## Description
-**Ember Match** is a device-agnostic memory game built with **Flutter** and the **Flame Engine**. 
-Unlike traditional static grid-based memory games, Ember Match features a dynamic "floating" mechanic: cards move freely across the screen, bouncing off the edges, adding a layer of physics-based difficulty to the classic memory challenge.
+**Memory Match** is a device-agnostic memory game built with **Flutter** and the **Flame Engine**. 
+Unlike traditional static grid-based memory games, Memory Match features a dynamic "floating" mechanic: cards move freely across the screen, bouncing off the edges, adding a layer of physics-based difficulty to the classic memory challenge.
 
 The project demonstrates advanced Flutter concepts including:
 - **Reactive State Management** (GetX)
@@ -39,15 +39,15 @@ This project fulfills the course requirements as follows:
 * **Screens:** Includes Start, Level Selection, Game, Result, and Summary screens.
 * **Navigation:** Intuitive navigation using GetX named routes.
 * **Responsiveness:** * Uses a `ResponsiveScaffold` with a max-width constraint (960px).
-    * Implements a breakpoint (600px) to adjust padding and layout in menus.
-    * Flame game world scales dynamically to fit the screen size (`onGameResize`) and recalculates card sizes.
+    * Implements a breakpoint (600px) to adjust padding and layout.
+    * Flame game world scales dynamically to fit the screen size (`onGameResize`).
 * **Persistence:** Uses **Hive** to save unlocked levels and completion times across app restarts.
 * **Input:** Fully playable via touchscreen (TapCallbacks) or mouse.
 
 ## Architecture
-The project follows a clean **MVVM-like** architecture:
+The project follows a clean **MVVM-like** architecture (implemented via GetX):
 * **Models:** Data definitions (`LevelModel`).
 * **Services:** Data persistence layer (`StorageService`).
-* **Controllers:** Logic and State Management (`GameController`).
-* **Screens/Widgets:** UI Layer.
+* **ViewModels (Controllers):** Logic and State Management (`GameController`).
+* **Views (Screens/Widgets):** UI Layer.
 * **Game:** Flame components and physics logic.
