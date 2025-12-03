@@ -16,28 +16,23 @@ class SummaryScreen extends StatelessWidget {
       title: "Adventure Complete",
       showAppBar: false,
       
-      // 1. LayoutBuilder ci dà le dimensioni dello schermo disponibile
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            // 2. ConstrainedBox forza la colonna ad essere ALMENO alta quanto lo schermo
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               
-              // 3. IntrinsicHeight aiuta a calcolare gli spazi corretti
               child: IntrinsicHeight(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
-                    // 4. spaceBetween distribuisce i widget: Testa in alto, Tabella al centro, Bottone in basso
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       
-                      // --- BLOCCO 1: HEADER (Titolo) ---
                       Column(
                         children: [
-                          const SizedBox(height: 20), // Margine superiore
+                          const SizedBox(height: 20), 
                           const Icon(Icons.workspace_premium, size: 70, color: Colors.amber),
                           const SizedBox(height: 15),
                           Text(
@@ -53,8 +48,6 @@ class SummaryScreen extends StatelessWidget {
                         ],
                       ),
 
-                      // --- BLOCCO 2: TABELLA (Al Centro) ---
-                      // Non serve Expanded qui grazie a spaceBetween, starà equidistante
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                         child: ConstrainedBox(
@@ -65,7 +58,6 @@ class SummaryScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Column(
                                 children: [
-                                  // Intestazione
                                   const Padding(
                                     padding: EdgeInsets.symmetric(vertical: 10.0),
                                     child: Row(
@@ -77,7 +69,6 @@ class SummaryScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const Divider(height: 1),
-                                  // Righe
                                   ...sortedKeys.map((id) {
                                     double time = results[id] ?? 0.0;
                                     return Container(
@@ -101,12 +92,11 @@ class SummaryScreen extends StatelessWidget {
                         ),
                       ),
 
-                      // --- BLOCCO 3: FOOTER (Bottone) ---
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20.0),
                         child: SizedBox(
                           width: 250,
-                          height: 55, // Un po' più grande per importanza
+                          height: 55, 
                           child: ElevatedButton.icon(
                             onPressed: () {
                               Get.defaultDialog(

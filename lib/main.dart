@@ -36,8 +36,6 @@ class MyApp extends StatelessWidget {
 
       getPages: [
         GetPage(name: '/', page: () => const StartScreen()),
-
-        // USA LA VERA SCHERMATA:
         GetPage(name: '/levels', page: () => const LevelSelectScreen()),
         GetPage(name: '/game', page: () => const GameScreen()),
         GetPage(name: '/result', page: () => const ResultScreen()),

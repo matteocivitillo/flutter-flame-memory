@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:get/get.dart';
@@ -13,17 +12,14 @@ import 'components/card_component.dart';
 class MemoryGame extends FlameGame {
   final LevelModel level;
   final GameController controller = Get.find<GameController>();
-  final Color topColor; // Colore ricevuto dalla UI
-
+  final Color topColor; 
   CardComponent? firstCardFlipped;
   bool isProcessing = false;
 
-  // Costruttore aggiornato per ricevere il colore
   MemoryGame(this.level, {required this.topColor});
 
   @override
   Future<void> onLoad() async {
-    // Passiamo il colore al componente di sfondo
     world.add(AnimatedBackgroundComponent(topColor: topColor, priority: -100));
 
     camera = CameraComponent();
@@ -109,7 +105,6 @@ class MemoryGame extends FlameGame {
   }
 }
 
-// --- SFONDO AGGIORNATO ---
 class AnimatedBackgroundComponent extends PositionComponent with HasGameRef {
   final Color topColor;
   
@@ -120,17 +115,14 @@ class AnimatedBackgroundComponent extends PositionComponent with HasGameRef {
   @override
   void update(double dt) {
     super.update(dt);
-    _time += dt * 0.3; // Animazione lenta
+    _time += dt * 0.3; 
     size = gameRef.size;
   }
 
   @override
   void render(Canvas canvas) {
-    // Colore 1 (ALTO): Fisso, uguale alla AppBar
     final colorTop = topColor;
     
-    // Colore 2 (BASSO): Scuro e animato (DeepPurple scuro <-> Nero)
-    // Usiamo il seno per oscillare leggermente la tonalità scura
     final colorBottom = Color.lerp(
       Colors.deepPurple.shade900, 
       Colors.black, 
@@ -139,9 +131,9 @@ class AnimatedBackgroundComponent extends PositionComponent with HasGameRef {
 
     final paint = Paint()
       ..shader = LinearGradient(
-        begin: Alignment.topCenter,    // Inizia esattamente in alto
-        end: Alignment.bottomCenter,   // Finisce in basso
-        stops: const [0.0, 1.0],       // Sfumatura lineare completa
+        begin: Alignment.topCenter,    
+        end: Alignment.bottomCenter,   
+        stops: const [0.0, 1.0],      
         colors: [colorTop, colorBottom],
       ).createShader(Rect.fromLTWH(0, 0, size.x, size.y));
 

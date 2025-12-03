@@ -28,8 +28,6 @@ class _GameScreenState extends State<GameScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // 1. Recuperiamo il colore della AppBar dal tema corrente
-    // Questo garantisce che la parte alta del gioco sia identica alla barra.
     final Color appBarColor = Theme.of(context).colorScheme.inversePrimary;
 
     return ResponsiveScaffold(
@@ -38,7 +36,6 @@ class _GameScreenState extends State<GameScreen> {
       child: Stack(
         children: [
           GameWidget(
-            // 2. Passiamo il colore al gioco
             game: MemoryGame(
               controller.currentLevel!, 
               topColor: appBarColor

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart'; // IMPORTANT: Needed for ScaleEffect
+import 'package:flame/effects.dart'; 
 import 'package:flame/events.dart';
 import '../../utils/app_assets.dart';
 import '../memory_game.dart';
@@ -17,10 +17,8 @@ class CardComponent extends SpriteGroupComponent<CardState>
   
   bool isMatched = false;
   
-  // Physics: Movement velocity
   Vector2 velocity = Vector2.zero();
   
-  // World boundaries
   Vector2 gameSize = Vector2.zero();
 
   CardComponent({
@@ -30,12 +28,11 @@ class CardComponent extends SpriteGroupComponent<CardState>
     required Vector2 position,
   }) : super(
           position: position,
-          anchor: Anchor.center, // Anchor is center!
+          anchor: Anchor.center, 
         );
 
   @override
   Future<void> onLoad() async {
-    // Load Assets
     String backPath = AppAssets.cardBack.replaceFirst('assets/images/', '');
     String frontPath = AppAssets.getCardImage(rank, suit).replaceFirst('assets/images/', '');
 
@@ -53,11 +50,9 @@ class CardComponent extends SpriteGroupComponent<CardState>
 
   void _randomizeVelocity() {
     final random = Random();
-    // Random speed between -150 and 150
     double vx = (random.nextDouble() * 300) - 150; 
     double vy = (random.nextDouble() * 300) - 150;
     
-    // Ensure it's not too slow
     if (vx.abs() < 50) vx = 50 * (vx.isNegative ? -1 : 1);
     if (vy.abs() < 50) vy = 50 * (vy.isNegative ? -1 : 1);
 
@@ -70,62 +65,50 @@ class CardComponent extends SpriteGroupComponent<CardState>
 
     if (current == CardState.front || isMatched) return;
 
-    // 1. Move
     position += velocity * dt;
 
-    // 2. Bounce Logic (Robust)
     if (gameSize.x == 0 || gameSize.y == 0) return;
 
     double halfW = size.x / 2;
     double halfH = size.y / 2;
-    double topMargin = 100.0; // Space for Score HUD
+    double topMargin = 100.0; 
 
-    // Check Left
     if (position.x <= halfW) {
       position.x = halfW;
-      velocity.x = velocity.x.abs(); // Force Right
+      velocity.x = velocity.x.abs();
     } 
-    // Check Right
     else if (position.x >= gameSize.x - halfW) {
       position.x = gameSize.x - halfW;
-      velocity.x = -velocity.x.abs(); // Force Left
+      velocity.x = -velocity.x.abs(); 
     }
 
-    // Check Top
     if (position.y <= halfH + topMargin) {
       position.y = halfH + topMargin;
-      velocity.y = velocity.y.abs(); // Force Down
+      velocity.y = velocity.y.abs(); 
     } 
-    // Check Bottom
     else if (position.y >= gameSize.y - halfH) {
       position.y = gameSize.y - halfH;
-      velocity.y = -velocity.y.abs(); // Force Up
+      velocity.y = -velocity.y.abs(); 
     }
   }
 
-  // Called when screen resizes
   void updateBounds(Vector2 newGameSize, double scaleFactor) {
     gameSize = newGameSize;
     
-    // Scale the card
     size = Vector2(75, 105) * scaleFactor;
     
-    // --- CRITICAL FIX FOR CLAMP ERROR ---
     double halfW = size.x / 2;
     double halfH = size.y / 2;
 
     double minX = halfW;
     double maxX = gameSize.x - halfW;
-    // Safety: ensure max is never smaller than min
     if (maxX < minX) maxX = minX;
 
     double topMargin = 100.0;
     double minY = halfH + topMargin; 
     double maxY = gameSize.y - halfH;
-    // Safety: ensure max is never smaller than min
     if (maxY < minY) maxY = minY;
 
-    // Clamp position to keep inside screen
     position.x = position.x.clamp(minX, maxX);
     position.y = position.y.clamp(minY, maxY);
   }
@@ -141,13 +124,12 @@ class CardComponent extends SpriteGroupComponent<CardState>
       current = CardState.front;
     } else {
       current = CardState.back;
-      _randomizeVelocity(); // Change direction on mistake
+      _randomizeVelocity(); 
     }
   }
 
   void match() {
     isMatched = true;
-    // Exit Animation
     add(
       ScaleEffect.to(
         Vector2.zero(), 

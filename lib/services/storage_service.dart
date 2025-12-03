@@ -5,7 +5,7 @@ class StorageService extends GetxService {
   late Box box;
 
   static const String _unlockedLevelsKey = 'unlocked_levels';
-  static const String _levelTimesKey = 'level_times'; // Nuova chiave per i tempi
+  static const String _levelTimesKey = 'level_times'; 
 
   Future<StorageService> init() async {
     await Hive.initFlutter();
@@ -30,15 +30,10 @@ class StorageService extends GetxService {
     }
   }
 
-  // --- NUOVI METODI PER I TEMPI ---
 
-  // Salva il tempo impiegato (in secondi) per un livello
   Future<void> saveLevelResult(int levelId, double timeTaken) async {
-    // Recuperiamo la mappa esistente (o ne creiamo una vuota)
-    // Usiamo Map<dynamic, dynamic> perché Hive restituisce quello
     Map<dynamic, dynamic> results = box.get(_levelTimesKey, defaultValue: {});
     
-    // Aggiorniamo il tempo solo se è migliore (minore) o se non esiste
     if (!results.containsKey(levelId) || timeTaken < results[levelId]) {
       results[levelId] = timeTaken;
       await box.put(_levelTimesKey, results);
@@ -46,19 +41,15 @@ class StorageService extends GetxService {
     }
   }
 
-  // Recupera tutti i risultati per la tabella finale
   Map<int, double> getAllResults() {
     Map<dynamic, dynamic> raw = box.get(_levelTimesKey, defaultValue: {});
-    // Convertiamo in una mappa sicura <int, double>
     return raw.map((key, value) => MapEntry(key as int, value as double));
   }
   
-  // RESET TOTALE (Modificato per cancellare tutto)
   Future<void> resetProgress() async {
-    await box.delete(_unlockedLevelsKey); // Cancella livelli sbloccati
-    await box.delete(_levelTimesKey);     // Cancella i tempi
+    await box.delete(_unlockedLevelsKey);
+    await box.delete(_levelTimesKey);    
     
-    // Ripristina stato iniziale (Livello 1 sbloccato)
     await box.put(_unlockedLevelsKey, [1]);
     print("PROGRESSI CANCELLATI!");
   }

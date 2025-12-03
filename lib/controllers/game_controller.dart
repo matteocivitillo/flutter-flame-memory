@@ -30,7 +30,6 @@ class GameController extends GetxController {
     super.onClose();
   }
 
-  // Chiamato quando si esce dalla schermata di gioco con "Indietro"
   void stopGamePrematurely() {
     print("Gioco interrotto dall'utente.");
     _stopTimer();

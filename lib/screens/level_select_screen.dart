@@ -17,9 +17,7 @@ class LevelSelectScreen extends StatelessWidget {
         builder: (context, constraints) {
           final int columns = constraints.maxWidth > 600 ? 3 : 1;
           
-          // WRAPPER OBX: Ascolta i cambiamenti nel controller
           return Obx(() {
-            // Prendiamo la lista aggiornata dal controller
             final unlockedList = controller.unlockedLevels.toList();
 
             return GridView.builder(
@@ -60,8 +58,6 @@ class LevelSelectScreen extends StatelessWidget {
     );
   }
 }
-// ... _LevelCard rimane uguale ...
-// --- Helper Widget for the Card ---
 class _LevelCard extends StatelessWidget {
   final LevelModel level;
   final bool isUnlocked;
@@ -75,7 +71,6 @@ class _LevelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Visual style depends on state (Locked vs Unlocked)
     final color = isUnlocked 
         ? Theme.of(context).colorScheme.primaryContainer 
         : Colors.grey[300];
@@ -95,7 +90,6 @@ class _LevelCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Level Info
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +109,6 @@ class _LevelCard extends StatelessWidget {
                 ],
               ),
               
-              // Status Icon (Lock or Play)
               Icon(
                 isUnlocked ? Icons.play_circle_fill : Icons.lock,
                 size: 32,
